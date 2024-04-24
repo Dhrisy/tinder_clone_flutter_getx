@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CustomTextFieldWidget extends StatelessWidget {
@@ -8,6 +9,7 @@ class CustomTextFieldWidget extends StatelessWidget {
   final bool? isObscure;
   final String? Function(String?)? validator;
   final TextInputType? keyboardType;
+  final IconData? suffixIcon;
 
   const CustomTextFieldWidget(
       {Key? key,
@@ -17,6 +19,7 @@ class CustomTextFieldWidget extends StatelessWidget {
       this.isObscure,
       this.validator,
       this.keyboardType,
+      this.suffixIcon,
       this.labelText})
       : super(key: key);
 
@@ -35,6 +38,8 @@ class CustomTextFieldWidget extends StatelessWidget {
           labelStyle: const TextStyle(
             fontSize: 18,
           ),
+          suffixIcon: suffixIcon != null ? Icon(CupertinoIcons.eye_slash) : SizedBox.shrink(),
+          
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(6),
             borderSide: const BorderSide(

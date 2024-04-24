@@ -3,12 +3,18 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tinder_clone_flutter_getx/models/person.dart' as personModel;
+import 'package:tinder_clone_flutter_getx/pages/authentication_screens/create_account_screen.dart';
+import 'package:tinder_clone_flutter_getx/pages/authentication_screens/login_screen.dart';
+import 'package:tinder_clone_flutter_getx/pages/home/home_screen.dart';
 
 class AuthenticationController extends GetxController {
   static AuthenticationController authController = Get.find();
+
+  late Rx<User?> firebaseCurrentUser;
 
   late Rx<File?> pickedFile;
   File? get profileImage => pickedFile.value;
@@ -57,6 +63,18 @@ class AuthenticationController extends GetxController {
     return downloadUrlOFImage;
   }
 
+  loginExistingAccount(String email, String password) async {
+    try {
+      // authenticate user and login user
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+
+          Get.to(HomeScreen());
+    } catch (error) {
+      Get.snackbar("Login successfull", "Error occured $error");
+    }
+  }
+
   createNewUserAccount(
     String password,
     File profileImage,
@@ -68,7 +86,6 @@ class AuthenticationController extends GetxController {
     String country,
     String profileHeading,
     String whatAreYouLookingFor,
-    int publishedDateTime,
 
     //apearance
     String height,
@@ -93,44 +110,72 @@ class AuthenticationController extends GetxController {
   ) async {
     try {
       // authenticate user and create user
-      UserCredential credential = await FirebaseAuth.instance
+      await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
-          //upload image to firebase
+                
+
+      //upload image to firebase
       String urlOfDownloadedImage = await uploadImageToStorage(profileImage);
 
-personModel.Person personInstance = personModel.Person(
-  profileImage: urlOfDownloadedImage,
-  age: age,
-  bodyType: bodyType,
-  city: city,
-  country: country,
-  drink: drink,
-smoke: smoke,
-education: education,
-email: email,
-employementStatus: employementStatus,
-haveChildren: haveChildren,
-height: height,
-language: language, 
-maritalStatus: maritalStatus,
-name: name,
-nationality: nationality,
- noOfChildren: noOfChildren,
- password: password,
- phone: phone,
- profession: profession,
- profileHeading: profileHeading,
- publishedDateTime: DateTime.now().millisecondsSinceEpoch,
- relationShipLookingFor: relationShipLookingFor,
- religion: religion,
- weight: weight,
- whatAreYouLookingFor: whatAreYouLookingFor,
-
-
-);
-
+      personModel.Person personInstance = personModel.Person(
+        profileImage: urlOfDownloadedImage,
+        age: age,
+        bodyType: bodyType,
+        city: city,
+        country: country,
+        drink: drink,
+        smoke: smoke,
+        education: education,
+        email: email,
+        employementStatus: employementStatus,
+        haveChildren: haveChildren,
+        height: height,
+        language: language,
+        maritalStatus: maritalStatus,
+        name: name,
+        nationality: nationality,
+        noOfChildren: noOfChildren,
+        password: password,
+        phone: phone,
+        profession: profession,
+        profileHeading: profileHeading,
+        publishedDateTime: DateTime.now().millisecondsSinceEpoch,
+        relationShipLookingFor: relationShipLookingFor,
+        religion: religion,
+        weight: weight,
+        whatAreYouLookingFor: whatAreYouLookingFor,
+      );
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .set(personInstance.toJson());
     } catch (error) {
-      Get.snackbar("Someting went wrong", "Error occurred: $error");
-    }
+ // Handle specific errors if needed
+      if (error is FirebaseAuthException) {
+        // FirebaseAuthException
+        Get.snackbar("Authentication Error", error.message!);
+      } else {
+        // General error
+        Get.snackbar("Something went wrong", "Error occurred: $error");
+      }    }
+  }
+
+checkUserLoggedIn(User? currentUser) async{
+if(currentUser == null){
+  //need to login up
+  Get.to(() => const LoginScreen());
+
+}else{
+  // user is logged in send to home
+  Get.to(() => const HomeScreen());
+}
+  }
+  @override
+  void onReady() {
+    
+    super.onReady();
+    firebaseCurrentUser = Rx<User?>(FirebaseAuth.instance.currentUser);
+    firebaseCurrentUser.bindStream(FirebaseAuth.instance.authStateChanges());
+    ever(firebaseCurrentUser, checkUserLoggedIn);
   }
 }

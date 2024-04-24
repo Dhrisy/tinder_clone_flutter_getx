@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:tinder_clone_flutter_getx/controllers/authentication_controller.dart';
+import 'package:tinder_clone_flutter_getx/pages/authentication_screens/create_account_screen.dart';
 import 'package:tinder_clone_flutter_getx/pages/authentication_screens/login_screen.dart';
 
 void main() async{
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData.dark().copyWith(
           scaffoldBackgroundColor: Colors.black
         ),
-        home: const LoginScreen(),
+        home:  const LoginScreen()
       ),
     );
   }
