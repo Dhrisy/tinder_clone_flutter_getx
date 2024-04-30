@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Person {
   //personal info
+  String? uid;
   String? profileImage;
   String? password;
   String? name;
@@ -39,6 +40,7 @@ class Person {
 
 
   Person({ 
+    this.uid,
     this.profileImage,
     this.password,
     this.name,
@@ -71,6 +73,7 @@ class Person {
   static Person fromDataSnapshot(DocumentSnapshot snapshot){
     var dataSnapshot = snapshot.data() as Map<String, dynamic>;
     return Person(
+      uid: dataSnapshot["uid"],
       password: dataSnapshot["password"],
       name : dataSnapshot["name"],
       profileImage : dataSnapshot["profileImage"],
@@ -105,6 +108,7 @@ class Person {
 // save into firebase as json format
 Map<String, dynamic> toJson() => 
 {
+  "uid": uid,
 "name": name,
 "password": password,
 "profile_image": profileImage,
